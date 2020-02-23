@@ -14,10 +14,10 @@ class ResultVC: UIViewController {
     
     var condition: String!
     var countNumber: String!
-    var collectionViewData: [FlickrResponse.PhotoObject] = []
+    var collectionViewData: [FlickrPhoto.Photo] = []
 
-    @IBOutlet var flickrCollecttionView: UICollectionView!
-    @IBOutlet var flickrCollectViewLayout: UICollectionViewFlowLayout!
+    @IBOutlet var flickrCollectionView: UICollectionView!
+    @IBOutlet var flickrCollectionViewLayout: UICollectionViewFlowLayout!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,12 +31,12 @@ class ResultVC: UIViewController {
         
         URLSession.shared.dataTask(with: URL(string: url)!) { (data, response, error) in
             let response: HTTPURLResponse = response as! HTTPURLResponse
-            
+        
             if response.statusCode == 200 {
                 do {
-                    self.collectionViewData = try JSONDecoder().decode(FlickrResponse.self, from: data!).photos.photo
+                    self.collectionViewData = try JSONDecoder().decode(FlickrPhoto.self, from: data!).photos.photo
                     DispatchQueue.main.async {
-                        self.flickrCollecttionView.reloadSections([0])
+                        self.flickrCollectionView.reloadSections([0])
                     }
                 } catch {
                     print(error)
@@ -57,51 +57,34 @@ class ResultVC: UIViewController {
 
 }
 
-extension ResultVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension ResultVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return collectionViewData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FlickrCell", for: indexPath) as! FlickrCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "flickrCell", for: indexPath) as! FlickrCollectionViewCell
         
-        cell.layer.borderWidth = 1
         cell.getFlickrImage(collectionViewData[indexPath.row])
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let lenght: CGFloat = (self.view.bounds.width - flickrCollectViewLayout.sectionInset.left - 20) / 2
+        let lenght: CGFloat = (self.view.bounds.width - flickrCollectionViewLayout.sectionInset.left - 20) / 2
         
         return CGSize(width: lenght, height: lenght)
     }
     
-}
-
-struct FlickrResponse: Codable {
-    
-    var photos: FlickrPhotos
-
-    struct FlickrPhotos: Codable {
-        var page: Int
-        var pages: Int
-        var perpage: Int
-        var total: String
-        var photo: [PhotoObject]
-    }
-    
-    struct PhotoObject: Codable {
-        var id: String
-        var owner: String
-        var secret: String
-        var server: String
-        var farm: Int
-        var title: String
-        var ispublic: Int
-        var isfriend: Int
-        var isfamily: Int
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath) as! FlickrCollectionViewCell
+        
+        if Flickr.shared.myFavorite[cell.flickrID] != nil {
+            cell.removeFavorite()
+        } else {
+            cell.addFavorite()
+        }
     }
     
 }

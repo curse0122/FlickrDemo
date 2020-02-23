@@ -21,8 +21,6 @@ class SearchVC: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
         let resultVC: ResultVC = segue.destination as! ResultVC
         
         resultVC.condition = conditionText.text
@@ -64,7 +62,7 @@ extension SearchVC: UITextFieldDelegate {
         
         if condition.count > 0 && countNumber.count > 0 && Int(countNumber) != nil && Int(countNumber)! > 0 {
             searchButton.isEnabled = true
-            searchButton.backgroundColor = .blue
+            searchButton.backgroundColor = .systemBlue
         } else {
             searchButton.isEnabled = false
             searchButton.backgroundColor = .lightGray
